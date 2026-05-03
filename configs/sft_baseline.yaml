@@ -1,0 +1,15 @@
+experiment_name: vanilla_sft_gsm8k
+model_name_or_path: Qwen/Qwen2.5-1.5B-Instruct
+train_file: data/gsm8k/train.jsonl
+output_dir: outputs/vanilla_sft_gsm8k
+max_seq_length: 1024
+per_device_train_batch_size: 2
+gradient_accumulation_steps: 8
+num_train_epochs: 2
+learning_rate: 1.0e-4
+logging_steps: 10
+save_steps: 200
+save_total_limit: 2
+bf16: true
+use_4bit: true
+packing: false

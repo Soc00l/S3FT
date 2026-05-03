@@ -1,0 +1,7 @@
+datasets
+peft
+pyyaml
+torch
+transformers
+trl
+tqdm
