@@ -1,19 +1,20 @@
-# Main Results
+# 主要实验结果
 
-## Datasets
+## 实验设置
 
-- In-domain: `GSM8K test`
-- Cross-domain: `SVAMP`
+- 底模：`Qwen2.5-1.5B-Instruct`
+- 任务内评测：`GSM8K test`
+- 跨数据集评测：`SVAMP`
+- 方法对比：
+  - `base`：不继续训练，直接评测底模
+  - `base_vanilla_N`：在同一批 gold 数据上继续做标准 SFT
+  - `base_s3ft_N`：在同一批数据上，用“模型自己答对的答案”选择性替换后再训练
 
-## Models
+其中 `N ∈ {1000, 3000, full}`。
 
-- `base`: `Qwen2.5-1.5B-Instruct`
-- `base_vanilla_N`: standard SFT on the same gold subset
-- `base_s3ft_N`: selective rewrite with model-correct self-answers on the same subset
+## 结果表
 
-## Accuracy
-
-| Model | GSM8K | SVAMP |
+| 模型 | GSM8K | SVAMP |
 | --- | ---: | ---: |
 | `base` | 0.37 | 0.76 |
 | `base_vanilla_1000` | 0.38 | 0.67 |
@@ -23,8 +24,46 @@
 | `base_vanilla_full` | 0.36 | 0.68 |
 | `base_s3ft_full` | 0.31 | 0.71 |
 
-## Notes
+## 结论
 
-- Vanilla SFT produced small or unstable in-domain gains on `GSM8K`, but consistently reduced `SVAMP` accuracy.
-- S3FT did not outperform vanilla on `GSM8K`, but it consistently preserved more cross-dataset generalization on `SVAMP`.
-- Neither continued-training route exceeded the base model on `SVAMP`, suggesting that further GSM8K-focused finetuning narrows generalization overall, while S3FT narrows it less.
+1. `Vanilla SFT` 在 `GSM8K` 上有时会带来轻微收益，但这个收益不稳定，且幅度很小。
+2. `Vanilla SFT` 在 `SVAMP` 上 consistently 下降，说明继续在 GSM8K 上监督训练会带来明显的跨分布泛化收缩。
+3. `S3FT` 没有提高 `GSM8K` 的任务内准确率，但在 `SVAMP` 上 consistently 比 vanilla 更稳。
+4. 这说明当前实现下，`S3FT` 更像是在“减缓泛化损失”，而不是“直接提高 in-domain 分数”。
+
+## 趋势图
+
+### GSM8K
+
+```text
+base               0.37  ████████████████████████████████
+vanilla_1000       0.38  █████████████████████████████████
+s3ft_1000          0.32  ███████████████████████████
+vanilla_3000       0.34  █████████████████████████████
+s3ft_3000          0.31  ██████████████████████████
+vanilla_full       0.36  ███████████████████████████████
+s3ft_full          0.31  ██████████████████████████
+```
+
+### SVAMP
+
+```text
+base               0.76  ████████████████████████████████████████████████████████████
+vanilla_1000       0.67  █████████████████████████████████████████████████████
+s3ft_1000          0.69  ███████████████████████████████████████████████████████
+vanilla_3000       0.66  ████████████████████████████████████████████████████
+s3ft_3000          0.72  █████████████████████████████████████████████████████████
+vanilla_full       0.68  ██████████████████████████████████████████████████████
+s3ft_full          0.71  █████████████████████████████████████████████████████████
+```
+
+## 如何理解这组结果
+
+- 如果只看 `GSM8K`，会觉得 vanilla 有时更高。
+- 但一旦看 `SVAMP`，就能看到 vanilla 的退化更明显。
+- `S3FT` 的优势主要不在于提升训练内表现，而在于让模型在“继续训练之后”不要掉得那么厉害。
+
+## 备注
+
+- 我们额外检查过评测截断问题；把 `max_new_tokens` 调大后，结果只发生了很小变化，不影响主要趋势判断。
+- 当前 judge 采用数值归一化的 exact match，适合数学题快速评测，但后续仍可以继续增强。

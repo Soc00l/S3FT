@@ -24,12 +24,13 @@
 
 ## 当前结论
 
-- `Vanilla SFT` 在 `GSM8K test` 上可能带来轻微或不稳定的收益。
-- `Vanilla SFT` 在 `SVAMP` 上会出现更明显的退化。
-- `S3FT` 在当前设置下没有提升 `GSM8K` in-domain accuracy。
-- `S3FT` 在 `SVAMP` 上 consistently 比 vanilla 更稳，说明它更像是在缓解继续监督带来的泛化收缩。
+- `Vanilla SFT` 在 `GSM8K test` 上有时会有轻微收益，但不稳定。
+- `Vanilla SFT` 在 `SVAMP` 上 consistently 退化，说明继续监督会让模型更偏训练分布。
+- `S3FT` 没有提升 `GSM8K` 的任务内分数，但在 `SVAMP` 上 consistently 比 vanilla 更稳。
+- 当前更保守、也更可信的结论是：
+  `S3FT` 的主要作用不是直接提分，而是缓解继续训练带来的泛化收缩。
 
-主结果见 [results/main_results.md](./results/main_results.md)。
+更完整的结果表、趋势图和中文分析见 [results/main_results.md](./results/main_results.md)。
 
 ## 主结果
 
@@ -42,6 +43,32 @@
 | `base_s3ft_3000` | 0.31 | 0.72 |
 | `base_vanilla_full` | 0.36 | 0.68 |
 | `base_s3ft_full` | 0.31 | 0.71 |
+
+## 一眼看懂
+
+### GSM8K
+
+```text
+base               0.37
+vanilla_1000       0.38
+s3ft_1000          0.32
+vanilla_3000       0.34
+s3ft_3000          0.31
+vanilla_full       0.36
+s3ft_full          0.31
+```
+
+### SVAMP
+
+```text
+base               0.76
+vanilla_1000       0.67
+s3ft_1000          0.69
+vanilla_3000       0.66
+s3ft_3000          0.72
+vanilla_full       0.68
+s3ft_full          0.71
+```
 
 ## 仓库结构
 
