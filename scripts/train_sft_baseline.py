@@ -25,12 +25,13 @@ def load_config(path: str) -> dict:
         return yaml.safe_load(f)
 
 
-def format_example(example: dict, tokenizer: AutoTokenizer) -> str:
-    return tokenizer.apply_chat_template(
+def build_text(example: dict, tokenizer: AutoTokenizer) -> dict:
+    text = tokenizer.apply_chat_template(
         example["messages"],
         tokenize=False,
         add_generation_prompt=False,
     )
+    return {"text": text}
 
 
 def main() -> None:
@@ -43,7 +44,7 @@ def main() -> None:
             load_in_4bit=True,
             bnb_4bit_quant_type="nf4",
             bnb_4bit_use_double_quant=True,
-            bnb_4bit_compute_dtype=torch.bfloat16,
+            bnb_4bit_compute_dtype=torch.float16,
         )
 
     tokenizer = AutoTokenizer.from_pretrained(cfg["model_name_or_path"], use_fast=True)
@@ -53,8 +54,9 @@ def main() -> None:
     model = AutoModelForCausalLM.from_pretrained(
         cfg["model_name_or_path"],
         quantization_config=bnb_config,
-        torch_dtype=torch.bfloat16 if cfg.get("bf16", False) else None,
+        torch_dtype=torch.float16,
         device_map="auto",
+        attn_implementation="eager",
     )
     model.config.use_cache = False
     if bnb_config is not None:
@@ -78,6 +80,11 @@ def main() -> None:
     )
 
     dataset = load_dataset("json", data_files=cfg["train_file"], split="train")
+    dataset = dataset.map(
+        lambda example: build_text(example, tokenizer),
+        remove_columns=dataset.column_names,
+        desc="Formatting chat examples",
+    )
 
     training_args = TrainingArguments(
         output_dir=cfg["output_dir"],
@@ -88,7 +95,8 @@ def main() -> None:
         logging_steps=cfg["logging_steps"],
         save_steps=cfg["save_steps"],
         save_total_limit=cfg["save_total_limit"],
-        bf16=cfg.get("bf16", False),
+        bf16=False,
+        fp16=False,
         gradient_checkpointing=True,
         lr_scheduler_type="cosine",
         warmup_ratio=0.03,
@@ -98,13 +106,10 @@ def main() -> None:
 
     trainer = SFTTrainer(
         model=model,
-        tokenizer=tokenizer,
+        processing_class=tokenizer,
         train_dataset=dataset,
         peft_config=peft_config,
         args=training_args,
-        formatting_func=lambda ex: format_example(ex, tokenizer),
-        max_seq_length=cfg["max_seq_length"],
-        packing=cfg.get("packing", False),
     )
 
     trainer.train()

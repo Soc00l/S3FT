@@ -1,0 +1,15 @@
+experiment_name: base_vanilla_full
+model_name_or_path: /data/.rootcache/modelscope/Qwen/Qwen2___5-1___5B-Instruct
+train_file: data/gsm8k/train_gold_subset_from_base_full.jsonl
+output_dir: outputs/base_vanilla_full
+max_seq_length: 1024
+per_device_train_batch_size: 2
+gradient_accumulation_steps: 8
+num_train_epochs: 1
+learning_rate: 5.0e-5
+logging_steps: 10
+save_steps: 500
+save_total_limit: 2
+bf16: false
+use_4bit: true
+packing: false

@@ -1,0 +1,15 @@
+experiment_name: stage2_vanilla_from_sft_1000
+model_name_or_path: outputs/vanilla_sft_gsm8k_merged
+train_file: data/gsm8k/train_gold_subset_1000.jsonl
+output_dir: outputs/stage2_vanilla_from_sft_1000
+max_seq_length: 1024
+per_device_train_batch_size: 2
+gradient_accumulation_steps: 8
+num_train_epochs: 1
+learning_rate: 1.0e-4
+logging_steps: 10
+save_steps: 200
+save_total_limit: 2
+bf16: false
+use_4bit: true
+packing: false

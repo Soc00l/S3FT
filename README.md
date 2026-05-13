@@ -62,4 +62,13 @@ pip install -r requirements.txt
 
 ## 当前状态
 
-项目骨架已初始化，接下来会优先补齐数学推理版本的最小可跑闭环。
+项目已经完成一轮围绕 `Qwen2.5-1.5B-Instruct` 的数学推理实验闭环，当前更像一个可继续扩展的研究仓库，而不是仅有骨架。
+
+## 最新实验结论
+
+- 对 base model 继续做 `Vanilla SFT`，在 `GSM8K test` 上可能有轻微收益，但在 `SVAMP` 上会出现明显退化。
+- `S3FT` 在当前设置下没有带来更高的 `GSM8K` 准确率，但在 `SVAMP` 上 consistently 比 vanilla 更稳。
+- 当前结果支持一个较保守的结论：
+  `S3FT` 更像是在缓解继续监督带来的泛化收缩，而不是直接提升 in-domain accuracy。
+
+详细结果见 [results/main_results.md](./results/main_results.md)。

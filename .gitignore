@@ -1,8 +1,7 @@
 # Python
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
+*.py[cod]
+*.so
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
@@ -11,22 +10,44 @@ __pycache__/
 .venv/
 venv/
 env/
+.env
 
-# Data and outputs
-data/raw/
-data/intermediate/
-results/*
-!results/.gitkeep
-reports/figures/
-
-# Training artifacts
-checkpoints/
-outputs/
-logs/
-wandb/
+# Logs
+*.log
 
 # OS / editor
 .DS_Store
 Thumbs.db
 .idea/
 .vscode/
+
+# Training artifacts
+outputs/
+checkpoint-*/
+checkpoints/
+logs/
+wandb/
+*.safetensors
+trainer_state.json
+training_args.bin
+optimizer.pt
+scheduler.pt
+rng_state.pth
+
+# Generated prediction files
+results/*_preds*.jsonl
+
+# Generated data artifacts
+data/gsm8k/self_answers_*.jsonl
+data/gsm8k/train_s3ft_*.jsonl
+data/gsm8k/train_self_answer_only_*.jsonl
+data/gsm8k/train_gold_subset_*.jsonl
+
+# Keep small summaries and docs
+!results/
+!results/.gitkeep
+!results/*.json
+!results/*.md
+
+# Local sync workspace
+remote_s3ft/
